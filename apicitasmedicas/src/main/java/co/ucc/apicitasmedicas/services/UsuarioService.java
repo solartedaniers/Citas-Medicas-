@@ -60,7 +60,8 @@ public class UsuarioService implements IUsuarioService {
 
         return new AuthResponseDTO(
             token, refreshToken,
-            usuario.getNombre(), usuario.getCorreo(), usuario.getRol().name()
+            usuario.getNombre(), usuario.getCorreo(),
+            usuario.getRol().name(), usuario.getId()
         );
     }
 
@@ -90,7 +91,8 @@ public class UsuarioService implements IUsuarioService {
 
         return new AuthResponseDTO(
             token, refreshToken,
-            paciente.getNombre(), paciente.getCorreo(), paciente.getRol().name()
+            paciente.getNombre(), paciente.getCorreo(),
+            paciente.getRol().name(), paciente.getId()
         );
     }
 

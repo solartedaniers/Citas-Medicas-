@@ -4,7 +4,7 @@ export interface LoginRequest {
 }
 
 export interface LoginCredentials {
-  correo:    string;
+  correo:     string;
   contrasena: string;
   recordarme?: boolean;
 }
@@ -15,4 +15,5 @@ export interface LoginResponse {
   nombre:       string;
   correo:       string;
   rol:          string;
+  id:           number;   // ← NUEVO
 }

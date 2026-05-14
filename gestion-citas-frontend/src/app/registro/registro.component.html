@@ -1,19 +1,19 @@
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 p-4">
+<div class="min-h-screen flex items-center justify-center p-4"
+  style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1d4ed8 100%)">
 
-  <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl px-8 py-10">
+  <div class="w-full max-w-lg bg-white rounded-3xl shadow-2xl px-8 py-10">
 
-    <!-- Header -->
-    <div class="text-center mb-8">
-      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary-100 mb-4">
-        <svg class="w-7 h-7 text-primary-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"/>
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-100 mb-4">
+        <svg class="w-7 h-7 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"/>
         </svg>
       </div>
-      <h2 class="font-display text-2xl font-bold text-slate-900">Crear cuenta</h2>
+      <h2 class="text-2xl font-bold text-slate-900">Crear cuenta</h2>
       <p class="text-sm text-slate-500 mt-1">Regístrate como paciente para agendar citas</p>
     </div>
 
-    <!-- Error -->
     @if (errorMessage) {
       <div class="mb-5 flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
         <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -27,37 +27,77 @@
 
       <!-- Nombre -->
       <div>
-        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Nombre completo</label>
+        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Nombre completo *</label>
         <input name="nombre" type="text" [(ngModel)]="form.nombre" required
           placeholder="Juan Pérez"
-          class="input-field"/>
+          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
       </div>
 
       <!-- Correo -->
       <div>
-        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Correo electrónico</label>
+        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Correo electrónico *</label>
         <input name="correo" type="email" [(ngModel)]="form.correo" required
           placeholder="juan@ejemplo.com"
-          class="input-field"/>
+          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+      </div>
+
+      <!-- Documento -->
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Documento de identidad *</label>
+        <div class="flex gap-2">
+          <select name="tipoDocumento" [(ngModel)]="form.tipoDocumento"
+            class="px-3 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="CEDULA">Cédula</option>
+            <option value="TARJETA_IDENTIDAD">Tarjeta de Identidad</option>
+            <option value="PASAPORTE">Pasaporte</option>
+          </select>
+          <input name="numeroDocumento" type="text" [(ngModel)]="form.numeroDocumento" required
+            placeholder="Número de documento"
+            class="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+        </div>
+      </div>
+
+      <!-- Género y Edad -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Género *</label>
+          <select name="genero" [(ngModel)]="form.genero" required
+            class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Seleccionar</option>
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
+            <option value="OTRO">Otro</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Edad *</label>
+          <select name="edad" [(ngModel)]="form.edad" required
+            class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option [value]="null">Seleccionar</option>
+            @for (e of edades; track e) {
+              <option [value]="e">{{ e }} años</option>
+            }
+          </select>
+        </div>
       </div>
 
       <!-- Teléfono -->
       <div>
-        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Teléfono (opcional)</label>
+        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Teléfono (opcional)</label>
         <input name="telefono" type="tel" [(ngModel)]="form.telefono"
           placeholder="+57 300 000 0000"
-          class="input-field"/>
+          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
       </div>
 
       <!-- Contraseña -->
       <div>
-        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Contraseña</label>
+        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Contraseña *</label>
         <div class="relative">
           <input name="contrasena"
             [type]="mostrarPassword ? 'text' : 'password'"
             [(ngModel)]="form.contrasena" required minlength="6"
             placeholder="Mínimo 6 caracteres"
-            class="input-field pr-10"/>
+            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"/>
           <button type="button" (click)="mostrarPassword = !mostrarPassword"
             class="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-600">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -68,8 +108,28 @@
         </div>
       </div>
 
+      <!-- Confirmar contraseña -->
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Confirmar contraseña *</label>
+        <div class="relative">
+          <input name="confirmarContrasena"
+            [type]="mostrarConfirmar ? 'text' : 'password'"
+            [(ngModel)]="form.confirmarContrasena" required
+            placeholder="Repite tu contraseña"
+            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"/>
+          <button type="button" (click)="mostrarConfirmar = !mostrarConfirmar"
+            class="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-600">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
       <!-- Botón -->
-      <button type="submit" [disabled]="regForm.invalid || loading" class="btn-primary w-full py-3 mt-2">
+      <button type="submit" [disabled]="regForm.invalid || loading"
+        class="w-full py-3 mt-2 bg-blue-700 hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors duration-200 text-sm flex items-center justify-center gap-2">
         @if (loading) {
           <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
@@ -83,9 +143,9 @@
 
     </form>
 
-    <p class="mt-6 text-center text-sm text-slate-500">
+    <p class="mt-5 text-center text-sm text-slate-500">
       ¿Ya tienes cuenta?
-      <a routerLink="/login" class="text-primary-700 font-semibold hover:underline ml-1">Iniciar sesión</a>
+      <a routerLink="/login" class="text-blue-700 font-semibold hover:underline ml-1">Iniciar sesión</a>
     </p>
 
   </div>

@@ -32,7 +32,7 @@ public class CitaService implements ICitaService {
     public CitaResponseDTO agendarCita(Long pacienteId, CitaRequestDTO request) {
         // Polimorfismo: Usuario abstracto → verificamos que sea Paciente
         Usuario usuarioPaciente = usuarioRepository.findById(pacienteId)
-                .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Paciente no encontrado con id: " + pacienteId));
 
         if (!(usuarioPaciente instanceof Paciente paciente)) {
             throw new RuntimeException("El usuario no tiene rol PACIENTE");
@@ -47,12 +47,15 @@ public class CitaService implements ICitaService {
 
         LocalDateTime fechaHora = LocalDateTime.parse(request.getFechaHora());
 
-        // Validar que el profesional esté disponible en ese horario
+        if (fechaHora.isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("No se pueden agendar citas en fechas pasadas");
+        }
+
         boolean ocupado = citaRepository.existsByProfesionalIdAndFechaHoraAndEstadoNot(
                 profesional.getId(), fechaHora, EstadoCita.CANCELADA
         );
         if (ocupado) {
-            throw new RuntimeException("El profesional ya tiene una cita en ese horario");
+            throw new RuntimeException("Agenda llena para esa fecha y hora");
         }
 
         Cita cita = new Cita(paciente, profesional, fechaHora, request.getMotivo());
