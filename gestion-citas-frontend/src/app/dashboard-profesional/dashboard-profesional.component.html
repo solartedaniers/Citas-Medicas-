@@ -1,0 +1,127 @@
+<app-navbar></app-navbar>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="font-display text-2xl font-bold text-slate-900">Panel Profesional</h1>
+    <p class="text-slate-500 text-sm mt-0.5">Gestiona tu agenda y horarios de atención</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-1 mb-6 bg-slate-100 rounded-xl p-1 w-fit">
+    <button (click)="vistaActiva = 'agenda'"
+      [class]="vistaActiva === 'agenda'
+        ? 'px-5 py-2 rounded-lg bg-white text-primary-700 font-semibold text-sm shadow-sm'
+        : 'px-5 py-2 rounded-lg text-slate-500 font-medium text-sm hover:text-slate-700'">
+      Mi Agenda
+    </button>
+    <button (click)="vistaActiva = 'horarios'"
+      [class]="vistaActiva === 'horarios'
+        ? 'px-5 py-2 rounded-lg bg-white text-primary-700 font-semibold text-sm shadow-sm'
+        : 'px-5 py-2 rounded-lg text-slate-500 font-medium text-sm hover:text-slate-700'">
+      Mis Horarios
+    </button>
+  </div>
+
+  <!-- Notificaciones -->
+  @if (successMsg) {
+    <div class="mb-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-4 py-3 text-sm">
+      <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      {{ successMsg }}
+    </div>
+  }
+  @if (errorMsg) {
+    <div class="mb-4 flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
+      <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+      </svg>
+      {{ errorMsg }}
+    </div>
+  }
+
+  <!-- Vista: Agenda -->
+  @if (vistaActiva === 'agenda') {
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <svg class="animate-spin h-8 w-8 text-primary-600" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+        </svg>
+      </div>
+    } @else if (citas.length === 0) {
+      <div class="text-center py-16 text-slate-500">
+        <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+        </svg>
+        <p class="font-medium">No tienes citas programadas</p>
+      </div>
+    } @else {
+      <div class="grid gap-4">
+        @for (cita of citas; track cita.id) {
+          <div class="card flex flex-col sm:flex-row sm:items-center gap-4">
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-sm">
+                  {{ cita.pacienteNombre.charAt(0) }}
+                </div>
+                <span class="font-semibold text-slate-800">{{ cita.pacienteNombre }}</span>
+              </div>
+              <p class="text-sm text-slate-600 ml-10">{{ formatFecha(cita.fechaHora) }}</p>
+              @if (cita.motivo) {
+                <p class="text-xs text-slate-500 ml-10 mt-1">{{ cita.motivo }}</p>
+              }
+            </div>
+            <span [class]="'badge-' + cita.estado.toLowerCase()">{{ cita.estado }}</span>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- Vista: Horarios -->
+  @if (vistaActiva === 'horarios') {
+    <div class="card max-w-2xl">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="font-semibold text-slate-800">Horarios de atención</h2>
+        <button (click)="agregarHorario()" class="btn-secondary py-1.5 px-3 text-xs">
+          + Agregar bloque
+        </button>
+      </div>
+
+      @if (horariosForm.length === 0) {
+        <p class="text-slate-500 text-sm text-center py-6">No has definido horarios aún.</p>
+      }
+
+      <div class="space-y-3">
+        @for (h of horariosForm; track $index; let i = $index) {
+          <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+            <select [(ngModel)]="h.diaSemana" class="input-field flex-1 text-sm py-2">
+              @for (dia of diasSemana; track dia.valor) {
+                <option [value]="dia.valor">{{ dia.etiqueta }}</option>
+              }
+            </select>
+            <input type="time" [(ngModel)]="h.horaInicio" class="input-field w-28 text-sm py-2"/>
+            <span class="text-slate-400 text-sm">→</span>
+            <input type="time" [(ngModel)]="h.horaFin" class="input-field w-28 text-sm py-2"/>
+            <button (click)="quitarHorario(i)"
+              class="w-8 h-8 flex items-center justify-center rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        }
+      </div>
+
+      @if (horariosForm.length > 0) {
+        <button (click)="guardarHorarios()" class="btn-primary w-full mt-5">
+          Guardar horarios
+        </button>
+      }
+    </div>
+  }
+
+</div>

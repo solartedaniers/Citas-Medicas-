@@ -1,0 +1,34 @@
+{
+  "properties": [
+    {
+      "name": "jwt.secret",
+      "type": "java.lang.String",
+      "description": "Clave secreta para firmar los JWT (mínimo 32 caracteres para HS256)."
+    },
+    {
+      "name": "jwt.expiration-ms",
+      "type": "java.lang.Long",
+      "description": "Tiempo de expiración del token de acceso en milisegundos."
+    },
+    {
+      "name": "jwt.refresh-expiration-ms",
+      "type": "java.lang.Long",
+      "description": "Tiempo de expiración del refresh token en milisegundos."
+    },
+    {
+      "name": "app.admin.nombre",
+      "type": "java.lang.String",
+      "description": "Nombre del administrador inicial creado al arrancar la aplicación."
+    },
+    {
+      "name": "app.admin.correo",
+      "type": "java.lang.String",
+      "description": "Correo del administrador inicial."
+    },
+    {
+      "name": "app.admin.contrasena",
+      "type": "java.lang.String",
+      "description": "Contraseña del administrador inicial (se almacena encriptada con BCrypt)."
+    }
+  ]
+}

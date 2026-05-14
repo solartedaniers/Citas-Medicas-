@@ -1,0 +1,16 @@
+package co.ucc.apicitasmedicas.dto;
+
+/** DTO para crear o actualizar una especialidad médica. */
+public class EspecialidadRequestDTO {
+
+    private String nombre;
+    private String descripcion;
+
+    public EspecialidadRequestDTO() {}
+
+    public String getNombre()                  { return nombre; }
+    public void   setNombre(String nombre)     { this.nombre = nombre; }
+
+    public String getDescripcion()                     { return descripcion; }
+    public void   setDescripcion(String descripcion)   { this.descripcion = descripcion; }
+}

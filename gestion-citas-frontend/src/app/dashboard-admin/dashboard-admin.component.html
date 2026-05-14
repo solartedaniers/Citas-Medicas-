@@ -1,0 +1,244 @@
+<app-navbar></app-navbar>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="font-display text-2xl font-bold text-slate-900">Panel Administrador</h1>
+    <p class="text-slate-500 text-sm mt-0.5">Gestión completa del sistema</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-1 mb-6 bg-slate-100 rounded-xl p-1 w-fit">
+    <button (click)="setVista('usuarios')"
+      [class]="vistaActiva === 'usuarios'
+        ? 'px-5 py-2 rounded-lg bg-white text-blue-700 font-semibold text-sm shadow-sm'
+        : 'px-5 py-2 rounded-lg text-slate-500 font-medium text-sm hover:text-slate-700'">
+      Usuarios
+    </button>
+    <button (click)="setVista('especialidades')"
+      [class]="vistaActiva === 'especialidades'
+        ? 'px-5 py-2 rounded-lg bg-white text-blue-700 font-semibold text-sm shadow-sm'
+        : 'px-5 py-2 rounded-lg text-slate-500 font-medium text-sm hover:text-slate-700'">
+      Especialidades
+    </button>
+    <button (click)="setVista('citas')"
+      [class]="vistaActiva === 'citas'
+        ? 'px-5 py-2 rounded-lg bg-white text-blue-700 font-semibold text-sm shadow-sm'
+        : 'px-5 py-2 rounded-lg text-slate-500 font-medium text-sm hover:text-slate-700'">
+      Todas las Citas
+    </button>
+  </div>
+
+  <!-- Notificaciones -->
+  @if (successMsg) {
+    <div class="mb-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-4 py-3 text-sm">
+      <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>{{ successMsg }}
+    </div>
+  }
+  @if (errorMsg) {
+    <div class="mb-4 flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
+      <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+      </svg>{{ errorMsg }}
+    </div>
+  }
+
+  <!-- ── USUARIOS ── -->
+  @if (vistaActiva === 'usuarios') {
+    @if (loadingUsuarios) {
+      <div class="flex justify-center py-16">
+        <svg class="animate-spin h-8 w-8 text-blue-600" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+        </svg>
+      </div>
+    } @else {
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-slate-100">
+              <th class="text-left py-3 px-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Usuario</th>
+              <th class="text-left py-3 px-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Rol</th>
+              <th class="text-left py-3 px-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Especialidad</th>
+              <th class="text-left py-3 px-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Estado</th>
+              <th class="text-left py-3 px-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50">
+            @for (u of usuarios; track u.id) {
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3 px-3">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs">
+                      {{ u.nombre.charAt(0) }}
+                    </div>
+                    <div>
+                      <p class="font-medium text-slate-800">{{ u.nombre }}</p>
+                      <p class="text-xs text-slate-400">{{ u.correo }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3 px-3">
+                  <select (change)="asignarRol(u, $any($event.target).value)"
+                    [value]="u.rol"
+                    class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <option value="PACIENTE">Paciente</option>
+                    <option value="PROFESIONAL">Profesional</option>
+                    <option value="ADMINISTRADOR">Administrador</option>
+                  </select>
+                </td>
+                <td class="py-3 px-3">
+                  @if (u.rol === 'PROFESIONAL') {
+                    <select (change)="asignarEspecialidadAProfesional(u.id, +$any($event.target).value)"
+                      class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                      <option value="0">Sin especialidad</option>
+                      @for (esp of especialidades; track esp.id) {
+                        <option [value]="esp.id" [selected]="u.especialidad === esp.nombre">{{ esp.nombre }}</option>
+                      }
+                    </select>
+                  } @else {
+                    <span class="text-slate-400 text-xs">—</span>
+                  }
+                </td>
+                <td class="py-3 px-3">
+                  <button (click)="cambiarEstado(u)"
+                    [class]="u.activo
+                      ? 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 cursor-pointer hover:bg-emerald-200'
+                      : 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500 cursor-pointer hover:bg-slate-200'">
+                    {{ u.activo ? 'Activo' : 'Inactivo' }}
+                  </button>
+                </td>
+                <td class="py-3 px-3">
+                  <button (click)="eliminarUsuario(u)"
+                    class="w-7 h-7 flex items-center justify-center rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  <!-- ── ESPECIALIDADES ── -->
+  @if (vistaActiva === 'especialidades') {
+    <div class="flex justify-end mb-4">
+      <button (click)="abrirCrearEspecialidad()"
+        class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-semibold text-sm rounded-xl transition-all duration-200 shadow-sm">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+        </svg>
+        Nueva especialidad
+      </button>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      @for (esp of especialidades; track esp.id) {
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col gap-3">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="font-semibold text-slate-800">{{ esp.nombre }}</p>
+              @if (esp.descripcion) {
+                <p class="text-xs text-slate-500 mt-0.5">{{ esp.descripcion }}</p>
+              }
+            </div>
+            <div class="flex gap-1">
+              <button (click)="abrirEditarEspecialidad(esp)"
+                class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/>
+                </svg>
+              </button>
+              <button (click)="eliminarEspecialidad(esp)"
+                class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── CITAS ── -->
+  @if (vistaActiva === 'citas') {
+    @if (loadingCitas) {
+      <div class="flex justify-center py-16">
+        <svg class="animate-spin h-8 w-8 text-blue-600" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+        </svg>
+      </div>
+    } @else {
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-slate-100">
+              <th class="text-left py-3 px-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Paciente</th>
+              <th class="text-left py-3 px-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Profesional</th>
+              <th class="text-left py-3 px-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Especialidad</th>
+              <th class="text-left py-3 px-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Fecha</th>
+              <th class="text-left py-3 px-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Estado</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50">
+            @for (c of citas; track c.id) {
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3 px-3 font-medium text-slate-700">{{ c.pacienteNombre }}</td>
+                <td class="py-3 px-3 text-slate-600">{{ c.profesionalNombre }}</td>
+                <td class="py-3 px-3 text-slate-500">{{ c.especialidad ||'—' }}</td>
+                <td class="py-3 px-3 text-slate-600">{{ formatFecha(c.fechaHora) }}</td>
+                <td class="py-3 px-3">
+                  <span [class]="getBadgeClase(c.estado)">{{ c.estado }}</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+</div>
+
+<!-- Modal especialidad -->
+@if (modalEspecialidad) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+      <h3 class="text-lg font-bold text-slate-900 mb-5">
+        {{ modoEdicion ? 'Editar especialidad' : 'Nueva especialidad' }}
+      </h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Nombre</label>
+          <input [(ngModel)]="especialidadForm.nombre" type="text" placeholder="Ej: Cardiología"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Descripción</label>
+          <textarea [(ngModel)]="especialidadForm.descripcion" rows="2" placeholder="Descripción breve..."
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+        </div>
+      </div>
+      <div class="flex gap-3 mt-6">
+        <button (click)="modalEspecialidad = false"
+          class="flex-1 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold text-sm rounded-xl transition-all duration-200">
+          Cancelar
+        </button>
+        <button (click)="guardarEspecialidad()" [disabled]="!especialidadForm.nombre"
+          class="flex-1 px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-semibold text-sm rounded-xl transition-all duration-200 disabled:opacity-50">
+          {{ modoEdicion ? 'Actualizar' : 'Crear' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
