@@ -1,10 +1,11 @@
 export interface Usuario {
-  id:           number;
-  nombre:       string;
-  correo:       string;
-  rol:          'PACIENTE' | 'PROFESIONAL' | 'ADMINISTRADOR';
-  activo:       boolean;
-  especialidad?: string;
+  id:              number;
+  nombre:          string;
+  correo:          string;
+  rol:             'PACIENTE' | 'PROFESIONAL' | 'ADMINISTRADOR';
+  activo:          boolean;
+  especialidad?:   string;
+  tipoProfesional?: string;
 }
 
 export interface RegistroRequest {

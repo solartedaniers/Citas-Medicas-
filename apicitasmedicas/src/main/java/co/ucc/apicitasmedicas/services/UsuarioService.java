@@ -1,29 +1,27 @@
 package co.ucc.apicitasmedicas.services;
 
-import co.ucc.apicitasmedicas.dto.*;
-import co.ucc.apicitasmedicas.model.*;
-import co.ucc.apicitasmedicas.repository.EspecialidadRepository;
-import co.ucc.apicitasmedicas.repository.UsuarioRepository;
-import co.ucc.apicitasmedicas.util.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * Implementación del servicio de usuarios.
- *
- * Responsabilidad única: lógica de negocio relacionada a usuarios.
- *
- * Polimorfismo aplicado:
- *  - Se recibe un Usuario (referencia abstracta) y se opera sobre él
- *    sin conocer el subtipo concreto en muchos casos.
- *  - En asignarRol() se usa instanceof con pattern matching (Java 16+)
- *    para convertir al subtipo correcto según el nuevo rol.
- */
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import co.ucc.apicitasmedicas.dto.ActualizarPerfilPacienteRequestDTO;
+import co.ucc.apicitasmedicas.dto.AuthResponseDTO;
+import co.ucc.apicitasmedicas.dto.RegistroPacienteRequestDTO;
+import co.ucc.apicitasmedicas.dto.UsuarioResponseDTO;
+import co.ucc.apicitasmedicas.model.Especialidad;
+import co.ucc.apicitasmedicas.model.Paciente;
+import co.ucc.apicitasmedicas.model.Profesional;
+import co.ucc.apicitasmedicas.model.Rol;
+import co.ucc.apicitasmedicas.model.Usuario;
+import co.ucc.apicitasmedicas.repository.EspecialidadRepository;
+import co.ucc.apicitasmedicas.repository.UsuarioRepository;
+import co.ucc.apicitasmedicas.util.JwtUtil;
+
 @Service
 public class UsuarioService implements IUsuarioService {
 
@@ -43,18 +41,15 @@ public class UsuarioService implements IUsuarioService {
     @Override
     public AuthResponseDTO login(String correo, String contrasena) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByCorreo(correo);
-
         if (usuarioOpt.isEmpty()) return null;
 
         Usuario usuario = usuarioOpt.get();
-
         if (!usuario.isActivo()) return null;
         if (!passwordEncoder.matches(contrasena, usuario.getContrasena())) return null;
 
         String token        = jwtUtil.generarToken(usuario.getCorreo(), usuario.getRol().name());
         String refreshToken = jwtUtil.generarRefreshToken(usuario.getCorreo());
 
-        // Guardar refreshToken en BD para invalidación segura
         usuario.setRefreshToken(refreshToken);
         usuarioRepository.save(usuario);
 
@@ -65,7 +60,7 @@ public class UsuarioService implements IUsuarioService {
         );
     }
 
-    // ── Registro de paciente ──────────────────────────────────
+    // ── Registro ──────────────────────────────────────────────
 
     @Override
     public AuthResponseDTO registrarPaciente(RegistroPacienteRequestDTO request) {
@@ -79,13 +74,15 @@ public class UsuarioService implements IUsuarioService {
             passwordEncoder.encode(request.getContrasena())
         );
         paciente.setTelefono(request.getTelefono());
+        if (request.getTipoDocumento()   != null) paciente.setTipoDocumento(request.getTipoDocumento());
+        if (request.getNumeroDocumento() != null) paciente.setNumeroDocumento(request.getNumeroDocumento());
+        if (request.getGenero()          != null) paciente.setGenero(request.getGenero());
+        if (request.getEdad()            != null) paciente.setEdad(request.getEdad());
 
-        // Guardar primero para obtener el ID
         usuarioRepository.save(paciente);
 
         String token        = jwtUtil.generarToken(paciente.getCorreo(), paciente.getRol().name());
         String refreshToken = jwtUtil.generarRefreshToken(paciente.getCorreo());
-
         paciente.setRefreshToken(refreshToken);
         usuarioRepository.save(paciente);
 
@@ -100,10 +97,8 @@ public class UsuarioService implements IUsuarioService {
 
     @Override
     public String obtenerNuevoToken(String refreshToken) {
-        // 1. Verificar firma y expiración del JWT
         if (!jwtUtil.esRefreshTokenValido(refreshToken)) return null;
 
-        // 2. Verificar que el refreshToken exista en BD (invalida tokens robados o revocados)
         Optional<Usuario> usuarioOpt = usuarioRepository.findByRefreshToken(refreshToken);
         if (usuarioOpt.isEmpty()) return null;
 
@@ -131,16 +126,15 @@ public class UsuarioService implements IUsuarioService {
     // ── Administración ────────────────────────────────────────
 
     @Override
+    @Transactional
     public UsuarioResponseDTO asignarRol(Long usuarioId, String nuevoRol) {
         usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + usuarioId));
 
         Rol rol = Rol.valueOf(nuevoRol.toUpperCase());
-
-        // Actualiza tipo_usuario y rol directamente en BD sin borrar el registro
-        // Esto preserva el ID del usuario (crítico para tokens y relaciones)
         usuarioRepository.actualizarTipoYRol(usuarioId, rol.name(), rol.name());
 
+        // Limpiar caché de JPA para que la próxima lectura vaya a BD
         Usuario actualizado = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Error al recargar usuario"));
 
@@ -152,7 +146,6 @@ public class UsuarioService implements IUsuarioService {
         Usuario usuario = usuarioRepository.findById(profesionalId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // instanceof con pattern matching (Java 16+) – polimorfismo seguro
         if (!(usuario instanceof Profesional profesional)) {
             throw new RuntimeException("El usuario con id " + profesionalId + " no es un Profesional");
         }
@@ -162,7 +155,6 @@ public class UsuarioService implements IUsuarioService {
 
         profesional.setEspecialidad(especialidad);
         usuarioRepository.save(profesional);
-
         return mapearAResponse(profesional);
     }
 
@@ -183,21 +175,73 @@ public class UsuarioService implements IUsuarioService {
         return mapearAResponse(usuario);
     }
 
-    // ── Mapeo privado (responsabilidad única de transformación) ─
+    // ── Profesional ───────────────────────────────────────────
+
+    @Override
+    public UsuarioResponseDTO actualizarTipoProfesional(Long profesionalId, String tipoProfesional) {
+        Usuario usuario = usuarioRepository.findById(profesionalId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + profesionalId));
+
+        if (!(usuario instanceof Profesional profesional)) {
+            throw new RuntimeException("El usuario no tiene rol PROFESIONAL");
+        }
+
+        profesional.setTipoProfesional(tipoProfesional);
+        Profesional guardado = (Profesional) usuarioRepository.save(profesional);
+        return mapearAResponse(guardado);
+    }
+
+    // ── Paciente ──────────────────────────────────────────────
+
+    @Override
+    public UsuarioResponseDTO actualizarPerfilPaciente(Long pacienteId,
+                                                        ActualizarPerfilPacienteRequestDTO request) {
+        // FIX null pointer: verificar explícitamente antes de operar
+        Optional<Usuario> opt = usuarioRepository.findById(pacienteId);
+        if (opt.isEmpty()) {
+            throw new RuntimeException("Paciente no encontrado: " + pacienteId);
+        }
+
+        Usuario usuario = opt.get();
+
+        if (!(usuario instanceof Paciente paciente)) {
+            throw new RuntimeException("El usuario no tiene rol PACIENTE");
+        }
+
+        if (request.getTelefono() != null && !request.getTelefono().isBlank()) {
+            paciente.setTelefono(request.getTelefono());
+        }
+        if (request.getGenero() != null && !request.getGenero().isBlank()) {
+            paciente.setGenero(request.getGenero());
+        }
+
+        Paciente guardado = (Paciente) usuarioRepository.save(paciente);
+        return mapearAResponse(guardado);
+    }
+
+    // ── Mapeo privado ─────────────────────────────────────────
 
     private UsuarioResponseDTO mapearAResponse(Usuario usuario) {
-        String especialidad = null;
-        // Polimorfismo: solo el Profesional tiene especialidad
-        if (usuario instanceof Profesional p && p.getEspecialidad() != null) {
-            especialidad = p.getEspecialidad().getNombre();
+        String especialidad    = null;
+        String tipoProfesional = null;
+        if (usuario instanceof Profesional p) {
+            especialidad    = (p.getEspecialidad() != null) ? p.getEspecialidad().getNombre() : null;
+            tipoProfesional = p.getTipoProfesional();
         }
-        return new UsuarioResponseDTO(
+        UsuarioResponseDTO dto = new UsuarioResponseDTO(
             usuario.getId(),
             usuario.getNombre(),
             usuario.getCorreo(),
             usuario.getRol().name(),
             usuario.isActivo(),
-            especialidad
+            especialidad,
+            tipoProfesional
         );
+        // Datos adicionales del paciente
+        if (usuario instanceof Paciente pac) {
+            dto.setTelefono(pac.getTelefono());
+            dto.setGenero(pac.getGenero());
+        }
+        return dto;
     }
 }

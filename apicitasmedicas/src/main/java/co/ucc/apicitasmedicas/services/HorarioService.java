@@ -1,21 +1,21 @@
 package co.ucc.apicitasmedicas.services;
 
+import java.time.DayOfWeek;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import co.ucc.apicitasmedicas.dto.HorarioRequestDTO;
 import co.ucc.apicitasmedicas.model.HorarioDisponible;
 import co.ucc.apicitasmedicas.model.Profesional;
 import co.ucc.apicitasmedicas.model.Usuario;
 import co.ucc.apicitasmedicas.repository.HorarioRepository;
 import co.ucc.apicitasmedicas.repository.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DayOfWeek;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-
-/** Responsabilidad única: gestión de horarios disponibles de un profesional. */
 @Service
 public class HorarioService implements IHorarioService {
 
@@ -30,6 +30,11 @@ public class HorarioService implements IHorarioService {
         return horarioRepository.findByProfesionalId(profesionalId);
     }
 
+    /**
+     * Define los horarios de un profesional.
+     * Se usa @Transactional aquí (en el Service) para que el delete
+     * y el saveAll ocurran en la misma transacción correctamente.
+     */
     @Override
     @Transactional
     public List<HorarioDisponible> definirHorarios(Long profesionalId,
@@ -37,15 +42,14 @@ public class HorarioService implements IHorarioService {
         Usuario usuario = usuarioRepository.findById(profesionalId)
                 .orElseThrow(() -> new RuntimeException("Profesional no encontrado: " + profesionalId));
 
-        // Polimorfismo: verificamos subtipo
         if (!(usuario instanceof Profesional profesional)) {
             throw new RuntimeException("El usuario no tiene rol PROFESIONAL");
         }
 
-        // Reemplazar horarios anteriores por los nuevos
+        // Eliminar con query nativa dentro de la misma transacción
         horarioRepository.deleteByProfesionalId(profesionalId);
-        horarioRepository.flush();
 
+        // Crear los nuevos horarios
         List<HorarioDisponible> nuevos = new ArrayList<>();
         for (HorarioRequestDTO dto : horariosDTO) {
             HorarioDisponible h = new HorarioDisponible(

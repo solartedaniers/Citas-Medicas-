@@ -29,6 +29,13 @@ export class DashboardPacienteComponent implements OnInit {
   errorMsg = '';
   successMsg = '';
 
+  // Perfil paciente
+  mostrarPerfil = false;
+  perfilForm = { telefono: '', genero: '' };
+  guardandoPerfil = false;
+  successPerfilMsg = '';
+  errorPerfilMsg = '';
+
   // Modal agendar
   modalAgendar = false;
   tipoAtencion = '';
@@ -41,6 +48,7 @@ export class DashboardPacienteComponent implements OnInit {
   nuevaFechaHora = '';
 
   filtroEstado = 'TODAS';
+  errorModalMsg = '';
 
   // Fecha mínima para el datepicker (hoy)
   get fechaMinima(): string {
@@ -60,6 +68,11 @@ export class DashboardPacienteComponent implements OnInit {
     this.cargarCitas();
     this.cargarProfesionales();
     this.cargarEspecialidades();
+
+    // Cargar datos actuales del perfil
+    const u = this.authService.getUsuario() as any;
+    this.perfilForm.telefono = u?.telefono ?? '';
+    this.perfilForm.genero = u?.genero ?? '';
   }
 
   get pacienteId(): number {
@@ -94,6 +107,27 @@ export class DashboardPacienteComponent implements OnInit {
     });
   }
 
+  abrirPerfil(): void {
+    this.mostrarPerfil = true;
+    this.successPerfilMsg = '';
+    this.errorPerfilMsg = '';
+  }
+
+  guardarPerfil(): void {
+    this.guardandoPerfil = true;
+    this.usuariosService.actualizarPerfilPaciente(this.pacienteId, this.perfilForm).subscribe({
+      next: () => {
+        this.guardandoPerfil = false;
+        this.successPerfilMsg = 'Perfil actualizado correctamente';
+        setTimeout(() => this.successPerfilMsg = '', 4000);
+      },
+      error: () => {
+        this.guardandoPerfil = false;
+        this.errorPerfilMsg = 'Error al actualizar el perfil';
+      }
+    });
+  }
+
   abrirModalAgendar(): void {
     this.tipoAtencion = '';
     this.especialidadSeleccionada = '';
@@ -105,6 +139,7 @@ export class DashboardPacienteComponent implements OnInit {
 
   cerrarModalAgendar(): void {
     this.modalAgendar = false;
+    this.errorModalMsg = '';
   }
 
   onTipoAtencionChange(): void {
@@ -146,21 +181,21 @@ export class DashboardPacienteComponent implements OnInit {
   agendarCita(): void {
     if (!this.nuevaCita.profesionalId || !this.nuevaCita.fechaHora) return;
 
-    // Validar que no sea fecha pasada
     if (new Date(this.nuevaCita.fechaHora) <= new Date()) {
-      this.mostrarError('No puedes agendar una cita en el pasado');
+      this.errorModalMsg = 'No puedes agendar una cita en el pasado.';
       return;
     }
 
     this.citasService.agendar(this.pacienteId, this.nuevaCita).subscribe({
       next: () => {
         this.modalAgendar = false;
+        this.errorModalMsg = '';
         this.mostrarExito('Cita agendada correctamente');
         this.cargarCitas();
       },
       error: (err) => {
         const msg = typeof err.error === 'string' ? err.error : 'Error al agendar la cita';
-        this.mostrarError(msg);
+        this.errorModalMsg = msg;
       }
     });
   }
@@ -186,7 +221,7 @@ export class DashboardPacienteComponent implements OnInit {
     if (!this.citaAReprogramar || !this.nuevaFechaHora) return;
 
     if (new Date(this.nuevaFechaHora) <= new Date()) {
-      this.mostrarError('No puedes reprogramar a una fecha pasada');
+      this.errorModalMsg = 'No puedes reprogramar a una fecha pasada.';
       return;
     }
 
@@ -198,12 +233,13 @@ export class DashboardPacienteComponent implements OnInit {
     this.citasService.reprogramar(this.citaAReprogramar.id, this.pacienteId, req).subscribe({
       next: () => {
         this.modalReprogramar = false;
+        this.errorModalMsg = '';
         this.mostrarExito('Cita reprogramada');
         this.cargarCitas();
       },
       error: (err) => {
         const msg = typeof err.error === 'string' ? err.error : 'Error al reprogramar';
-        this.mostrarError(msg);
+        this.errorModalMsg = msg;
       }
     });
   }

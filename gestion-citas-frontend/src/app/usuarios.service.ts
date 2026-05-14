@@ -38,4 +38,12 @@ export class UsuariosService {
   eliminar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  actualizarTipoProfesional(id: number, tipoProfesional: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}/tipo-profesional`, { tipoProfesional });
+  }
+
+  actualizarPerfilPaciente(id: number, data: { telefono?: string; genero?: string }): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}/perfil-paciente`, data);
+  }
 }

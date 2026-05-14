@@ -1,5 +1,7 @@
 package co.ucc.apicitasmedicas.controller;
 
+import co.ucc.apicitasmedicas.dto.ActualizarPerfilPacienteRequestDTO;
+import co.ucc.apicitasmedicas.dto.ActualizarProfesionalRequestDTO;
 import co.ucc.apicitasmedicas.dto.AsignarRolRequestDTO;
 import co.ucc.apicitasmedicas.dto.UsuarioResponseDTO;
 import co.ucc.apicitasmedicas.services.IUsuarioService;
@@ -10,11 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * Controlador de usuarios (protegido por interceptor → requiere Bearer token).
- * Responsabilidad única: exponer operaciones CRUD/admin sobre usuarios.
- *
- * Solo el ADMINISTRADOR debería llamar a estos endpoints.
- * (La validación de rol por ahora la maneja la lógica de negocio.)
+ * Controlador de usuarios.
+ * Responsabilidad única: recibir peticiones HTTP y delegar al servicio.
+ * No contiene lógica de negocio.
  */
 @RestController
 @RequestMapping("/api/usuarios")
@@ -35,37 +35,31 @@ public class UsuarioController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /** Asignar un nuevo rol a un usuario existente (PACIENTE → PROFESIONAL, etc.). */
     @PutMapping("/{id}/rol")
     public ResponseEntity<?> asignarRol(@PathVariable Long id,
                                          @RequestBody AsignarRolRequestDTO request) {
         try {
-            UsuarioResponseDTO dto = usuarioService.asignarRol(id, request.getRol());
-            return ResponseEntity.ok(dto);
+            return ResponseEntity.ok(usuarioService.asignarRol(id, request.getRol()));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    /** Asignar especialidad médica a un profesional. */
     @PutMapping("/{profesionalId}/especialidad/{especialidadId}")
     public ResponseEntity<?> asignarEspecialidad(@PathVariable Long profesionalId,
                                                   @PathVariable Long especialidadId) {
         try {
-            UsuarioResponseDTO dto = usuarioService.asignarEspecialidad(profesionalId, especialidadId);
-            return ResponseEntity.ok(dto);
+            return ResponseEntity.ok(usuarioService.asignarEspecialidad(profesionalId, especialidadId));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    /** Activar o desactivar una cuenta. */
     @PutMapping("/{id}/estado")
     public ResponseEntity<?> cambiarEstado(@PathVariable Long id,
                                             @RequestParam boolean activo) {
         try {
-            UsuarioResponseDTO dto = usuarioService.cambiarEstado(id, activo);
-            return ResponseEntity.ok(dto);
+            return ResponseEntity.ok(usuarioService.cambiarEstado(id, activo));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -78,6 +72,28 @@ public class UsuarioController {
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    /** Profesional actualiza su tipo (Médico, Odontólogo, etc.) */
+    @PutMapping("/{id}/tipo-profesional")
+    public ResponseEntity<?> actualizarTipoProfesional(@PathVariable Long id,
+                                                        @RequestBody ActualizarProfesionalRequestDTO request) {
+        try {
+            return ResponseEntity.ok(usuarioService.actualizarTipoProfesional(id, request.getTipoProfesional()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    /** Paciente actualiza su perfil (teléfono, género) */
+    @PutMapping("/{id}/perfil-paciente")
+    public ResponseEntity<?> actualizarPerfilPaciente(@PathVariable Long id,
+                                                       @RequestBody ActualizarPerfilPacienteRequestDTO request) {
+        try {
+            return ResponseEntity.ok(usuarioService.actualizarPerfilPaciente(id, request));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

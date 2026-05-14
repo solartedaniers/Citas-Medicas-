@@ -5,10 +5,11 @@
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
     <div>
-      <h1 class="font-display text-2xl font-bold text-slate-900">Mis Citas</h1>
+      <h1 class="text-2xl font-bold text-slate-900">Mis Citas</h1>
       <p class="text-slate-500 text-sm mt-0.5">Gestiona tus citas médicas</p>
     </div>
-    <button (click)="abrirModalAgendar()" class="btn-primary">
+    <button (click)="abrirModalAgendar()"
+      class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-semibold text-sm rounded-xl transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5">
       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
       </svg>
@@ -21,16 +22,14 @@
     <div class="mb-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-4 py-3 text-sm">
       <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-      </svg>
-      {{ successMsg }}
+      </svg>{{ successMsg }}
     </div>
   }
   @if (errorMsg) {
     <div class="mb-4 flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
       <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
-      </svg>
-      {{ errorMsg }}
+      </svg>{{ errorMsg }}
     </div>
   }
 
@@ -38,10 +37,10 @@
   <div class="flex gap-2 mb-6 flex-wrap">
     @for (estado of ['TODAS','PENDIENTE','CONFIRMADA','CANCELADA','REPROGRAMADA','COMPLETADA']; track estado) {
       <button (click)="filtroEstado = estado"
+        class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 hover:scale-105"
         [style]="filtroEstado === estado
-          ? 'background:#1e40af; color:#ffffff; border:none;'
-          : 'background:#ffffff; color:#1e293b; border:1px solid #cbd5e1;'"
-        class="px-4 py-1.5 rounded-full text-xs font-semibold transition-all">
+          ? 'background:#1e40af; color:#ffffff; border-color:#1e40af;'
+          : 'background:#ffffff; color:#1e293b; border-color:#cbd5e1;'">
         {{ estado }}
       </button>
     }
@@ -50,7 +49,7 @@
   <!-- Citas -->
   @if (loading) {
     <div class="flex justify-center py-16">
-      <svg class="animate-spin h-8 w-8 text-primary-600" viewBox="0 0 24 24" fill="none">
+      <svg class="animate-spin h-8 w-8 text-blue-600" viewBox="0 0 24 24" fill="none">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
       </svg>
@@ -58,7 +57,8 @@
   } @else if (citasFiltradas.length === 0) {
     <div class="text-center py-16 text-slate-500">
       <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
       </svg>
       <p class="font-medium">No hay citas {{ filtroEstado !== 'TODAS' ? 'con estado ' + filtroEstado : '' }}</p>
       <p class="text-sm mt-1">Agenda tu primera cita haciendo clic en "Nueva cita"</p>
@@ -66,8 +66,8 @@
   } @else {
     <div class="grid gap-4">
       @for (cita of citasFiltradas; track cita.id) {
-        <div class="card flex flex-col sm:flex-row sm:items-center gap-4">
-          <!-- Info -->
+        <div class="bg-white rounded-2xl border border-slate-100 p-5 flex flex-col sm:flex-row sm:items-center gap-4
+          shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-default">
           <div class="flex-1">
             <div class="flex items-center gap-2 mb-1">
               <span class="font-semibold text-slate-800">{{ cita.profesionalNombre }}</span>
@@ -77,7 +77,8 @@
             </div>
             <p class="text-sm text-slate-600">
               <svg class="w-3.5 h-3.5 inline mr-1 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
               </svg>
               {{ formatFecha(cita.fechaHora) }}
             </p>
@@ -85,14 +86,20 @@
               <p class="text-xs text-slate-500 mt-1">Motivo: {{ cita.motivo }}</p>
             }
           </div>
-          <!-- Estado y acciones -->
-          <div class="flex items-center gap-3">
-            <span [class]="getBadgeClase(cita.estado)">{{ cita.estado }}</span>
+          <!-- Estado y acciones con bordes redondeados y colores -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <span [class]="getBadgeClase(cita.estado)" class="px-3 py-1 rounded-full text-xs font-semibold border">
+              {{ cita.estado }}
+            </span>
             @if (cita.estado === 'PENDIENTE' || cita.estado === 'CONFIRMADA') {
-              <button (click)="abrirReprogramar(cita)" class="btn-secondary py-1.5 px-3 text-xs">
+              <button (click)="abrirReprogramar(cita)"
+                class="px-3 py-1 rounded-full text-xs font-semibold border border-blue-200 bg-blue-50 text-blue-700
+                hover:bg-blue-100 hover:scale-105 transition-all duration-200">
                 Reprogramar
               </button>
-              <button (click)="cancelarCita(cita)" class="btn-danger py-1.5 px-3 text-xs">
+              <button (click)="cancelarCita(cita)"
+                class="px-3 py-1 rounded-full text-xs font-semibold border border-red-200 bg-red-50 text-red-700
+                hover:bg-red-100 hover:scale-105 transition-all duration-200">
                 Cancelar
               </button>
             }
@@ -108,27 +115,37 @@
 @if (modalAgendar) {
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-      <h3 class="text-lg font-bold text-slate-900 mb-5">Nueva cita médica</h3>
+      <h3 class="text-lg font-bold text-slate-900 mb-1">Nueva cita médica</h3>
+
+      <!-- Error dentro del modal -->
+      @if (errorModalMsg) {
+        <div class="mb-4 flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
+          <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+          </svg>
+          {{ errorModalMsg }}
+        </div>
+      }
 
       <div class="space-y-4">
 
-        <!-- Paso 1: Tipo de atención -->
+        <!-- Tipo de atención -->
         <div>
           <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Tipo de atención</label>
           <select [(ngModel)]="tipoAtencion" (ngModelChange)="onTipoAtencionChange()"
-            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="">Selecciona el tipo</option>
             <option value="ESPECIALISTA">Especialista</option>
             <option value="MEDICO_GENERAL">Médico General</option>
           </select>
         </div>
 
-        <!-- Especialidad (solo si eligió especialista) -->
+        <!-- Especialidad -->
         @if (tipoAtencion === 'ESPECIALISTA') {
           <div>
             <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Especialidad</label>
             <select [(ngModel)]="especialidadSeleccionada" (ngModelChange)="filtrarProfesionalesPorEspecialidad()"
-              class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">Selecciona la especialidad</option>
               @for (esp of especialidades; track esp.id) {
                 <option [value]="esp.nombre">{{ esp.nombre }}</option>
@@ -140,26 +157,27 @@
         <!-- Profesional -->
         @if (tipoAtencion && (tipoAtencion === 'MEDICO_GENERAL' || especialidadSeleccionada)) {
           <div>
-            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-              {{ tipoAtencion === 'ESPECIALISTA' ? 'Especialista' : 'Médico General' }}
-            </label>
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Profesional</label>
             <select [(ngModel)]="nuevaCita.profesionalId" (ngModelChange)="cargarHorariosProfesional()"
-              class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option [value]="0" disabled>Selecciona el profesional</option>
               @for (prof of profesionalesFiltrados; track prof.id) {
                 <option [value]="prof.id">{{ prof.nombre }}</option>
               }
             </select>
+            @if (profesionalesFiltrados.length === 0) {
+              <p class="text-xs text-amber-600 mt-1">No hay profesionales disponibles para este tipo.</p>
+            }
           </div>
         }
 
         <!-- Horarios disponibles -->
         @if (horariosDisponibles.length > 0) {
-          <div class="bg-blue-50 rounded-xl p-3">
+          <div class="bg-blue-50 border border-blue-100 rounded-xl p-3">
             <p class="text-xs font-semibold text-blue-700 mb-2">Horarios del profesional:</p>
             <div class="flex flex-wrap gap-2">
               @for (h of horariosDisponibles; track h.id) {
-                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-lg">
+                <span class="text-xs bg-white border border-blue-200 text-blue-800 px-2.5 py-1 rounded-lg">
                   {{ traducirDia(h.diaSemana) }}: {{ h.horaInicio }} - {{ h.horaFin }}
                 </span>
               }
@@ -167,12 +185,13 @@
           </div>
         }
 
-        <!-- Fecha y hora -->
+        <!-- Fecha y hora - con min para no permitir pasado -->
         <div>
           <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Fecha y hora</label>
           <input type="datetime-local" [(ngModel)]="nuevaCita.fechaHora"
             [min]="fechaMinima"
             class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+          <p class="text-xs text-slate-400 mt-1">Solo se permiten fechas a partir de hoy</p>
         </div>
 
         <!-- Motivo -->
@@ -187,7 +206,7 @@
 
       <div class="flex gap-3 mt-6">
         <button (click)="cerrarModalAgendar()"
-          class="flex-1 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold text-sm rounded-xl">
+          class="flex-1 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold text-sm rounded-xl hover:bg-slate-50 transition-colors">
           Cancelar
         </button>
         <button (click)="agendarCita()"
@@ -204,15 +223,33 @@
 @if (modalReprogramar && citaAReprogramar) {
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-      <h3 class="font-display text-lg font-bold text-slate-900 mb-2">Reprogramar cita</h3>
+      <h3 class="text-lg font-bold text-slate-900 mb-2">Reprogramar cita</h3>
       <p class="text-sm text-slate-500 mb-5">Con: {{ citaAReprogramar.profesionalNombre }}</p>
+
+      @if (errorModalMsg) {
+        <div class="mb-4 flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
+          <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+          </svg>
+          {{ errorModalMsg }}
+        </div>
+      }
+
       <div>
         <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Nueva fecha y hora</label>
-        <input type="datetime-local" [(ngModel)]="nuevaFechaHora" class="input-field"/>
+        <input type="datetime-local" [(ngModel)]="nuevaFechaHora"
+          [min]="fechaMinima"
+          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+        <p class="text-xs text-slate-400 mt-1">Solo se permiten fechas a partir de hoy</p>
       </div>
+
       <div class="flex gap-3 mt-6">
-        <button (click)="modalReprogramar = false" class="btn-secondary flex-1">Cancelar</button>
-        <button (click)="reprogramarCita()" class="btn-primary flex-1" [disabled]="!nuevaFechaHora">
+        <button (click)="modalReprogramar = false; errorModalMsg = ''"
+          class="flex-1 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold text-sm rounded-xl hover:bg-slate-50 transition-colors">
+          Cancelar
+        </button>
+        <button (click)="reprogramarCita()" [disabled]="!nuevaFechaHora"
+          class="flex-1 px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-semibold text-sm rounded-xl transition-colors disabled:opacity-50">
           Reprogramar
         </button>
       </div>

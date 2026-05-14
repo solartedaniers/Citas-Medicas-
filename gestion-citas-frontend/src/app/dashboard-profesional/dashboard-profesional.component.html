@@ -2,51 +2,44 @@
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-  <!-- Header -->
   <div class="mb-8">
-    <h1 class="font-display text-2xl font-bold text-slate-900">Panel Profesional</h1>
-    <p class="text-slate-500 text-sm mt-0.5">Gestiona tu agenda y horarios de atención</p>
+    <h1 class="text-2xl font-bold text-slate-900" style="animation: fadeInDown 0.5s ease">Panel Profesional</h1>
+    <p class="text-slate-500 text-sm mt-0.5">Gestiona tu agenda, horarios y perfil</p>
   </div>
 
   <!-- Tabs -->
   <div class="flex gap-1 mb-6 bg-slate-100 rounded-xl p-1 w-fit">
-    <button (click)="vistaActiva = 'agenda'"
-      [class]="vistaActiva === 'agenda'
-        ? 'px-5 py-2 rounded-lg bg-white text-primary-700 font-semibold text-sm shadow-sm'
-        : 'px-5 py-2 rounded-lg text-slate-500 font-medium text-sm hover:text-slate-700'">
-      Mi Agenda
-    </button>
-    <button (click)="vistaActiva = 'horarios'"
-      [class]="vistaActiva === 'horarios'
-        ? 'px-5 py-2 rounded-lg bg-white text-primary-700 font-semibold text-sm shadow-sm'
-        : 'px-5 py-2 rounded-lg text-slate-500 font-medium text-sm hover:text-slate-700'">
-      Mis Horarios
-    </button>
+    @for (tab of [{v:'agenda',l:'Mi Agenda'},{v:'horarios',l:'Mis Horarios'},{v:'perfil',l:'Mi Perfil'}]; track tab.v) {
+      <button (click)="setVista($any(tab.v))"
+        [class]="vistaActiva === tab.v
+          ? 'px-5 py-2 rounded-lg bg-white text-blue-700 font-semibold text-sm shadow-sm transition-all'
+          : 'px-5 py-2 rounded-lg text-slate-500 font-medium text-sm hover:text-slate-700 transition-all'">
+        {{ tab.l }}
+      </button>
+    }
   </div>
 
   <!-- Notificaciones -->
   @if (successMsg) {
-    <div class="mb-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-4 py-3 text-sm">
+    <div class="mb-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-4 py-3 text-sm animate-pulse">
       <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-      </svg>
-      {{ successMsg }}
+      </svg>{{ successMsg }}
     </div>
   }
   @if (errorMsg) {
     <div class="mb-4 flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
       <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
-      </svg>
-      {{ errorMsg }}
+      </svg>{{ errorMsg }}
     </div>
   }
 
-  <!-- Vista: Agenda -->
+  <!-- AGENDA -->
   @if (vistaActiva === 'agenda') {
     @if (loading) {
       <div class="flex justify-center py-16">
-        <svg class="animate-spin h-8 w-8 text-primary-600" viewBox="0 0 24 24" fill="none">
+        <svg class="animate-spin h-8 w-8 text-blue-600" viewBox="0 0 24 24" fill="none">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
         </svg>
@@ -54,17 +47,19 @@
     } @else if (citas.length === 0) {
       <div class="text-center py-16 text-slate-500">
         <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5"/>
         </svg>
         <p class="font-medium">No tienes citas programadas</p>
       </div>
     } @else {
       <div class="grid gap-4">
         @for (cita of citas; track cita.id) {
-          <div class="card flex flex-col sm:flex-row sm:items-center gap-4">
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 flex flex-col sm:flex-row sm:items-center gap-4
+            hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-default">
             <div class="flex-1">
               <div class="flex items-center gap-2 mb-1">
-                <div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-sm">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">
                   {{ cita.pacienteNombre.charAt(0) }}
                 </div>
                 <span class="font-semibold text-slate-800">{{ cita.pacienteNombre }}</span>
@@ -74,19 +69,20 @@
                 <p class="text-xs text-slate-500 ml-10 mt-1">{{ cita.motivo }}</p>
               }
             </div>
-            <span [class]="'badge-' + cita.estado.toLowerCase()">{{ cita.estado }}</span>
+            <span [class]="getBadgeCita(cita.estado)">{{ cita.estado }}</span>
           </div>
         }
       </div>
     }
   }
 
-  <!-- Vista: Horarios -->
+  <!-- HORARIOS -->
   @if (vistaActiva === 'horarios') {
-    <div class="card max-w-2xl">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 max-w-2xl">
       <div class="flex items-center justify-between mb-6">
         <h2 class="font-semibold text-slate-800">Horarios de atención</h2>
-        <button (click)="agregarHorario()" class="btn-secondary py-1.5 px-3 text-xs">
+        <button (click)="agregarHorario()"
+          class="px-4 py-1.5 border border-slate-200 bg-white text-slate-700 text-xs font-semibold rounded-xl hover:bg-slate-50 transition-colors">
           + Agregar bloque
         </button>
       </div>
@@ -97,15 +93,19 @@
 
       <div class="space-y-3">
         @for (h of horariosForm; track $index; let i = $index) {
-          <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-            <select [(ngModel)]="h.diaSemana" class="input-field flex-1 text-sm py-2">
+          <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl
+            hover:bg-blue-50 hover:border hover:border-blue-100 transition-all duration-200">
+            <select [(ngModel)]="h.diaSemana"
+              class="flex-1 px-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400">
               @for (dia of diasSemana; track dia.valor) {
                 <option [value]="dia.valor">{{ dia.etiqueta }}</option>
               }
             </select>
-            <input type="time" [(ngModel)]="h.horaInicio" class="input-field w-28 text-sm py-2"/>
+            <input type="time" [(ngModel)]="h.horaInicio"
+              class="w-28 px-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
             <span class="text-slate-400 text-sm">→</span>
-            <input type="time" [(ngModel)]="h.horaFin" class="input-field w-28 text-sm py-2"/>
+            <input type="time" [(ngModel)]="h.horaFin"
+              class="w-28 px-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
             <button (click)="quitarHorario(i)"
               class="w-8 h-8 flex items-center justify-center rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -117,10 +117,39 @@
       </div>
 
       @if (horariosForm.length > 0) {
-        <button (click)="guardarHorarios()" class="btn-primary w-full mt-5">
+        <button (click)="guardarHorarios()"
+          class="w-full mt-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-semibold text-sm rounded-xl transition-colors duration-200">
           Guardar horarios
         </button>
       }
+    </div>
+  }
+
+  <!-- PERFIL -->
+  @if (vistaActiva === 'perfil') {
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 max-w-md">
+      <h2 class="font-semibold text-slate-800 mb-5">Mi tipo de profesional</h2>
+      <p class="text-sm text-slate-500 mb-4">
+        Define qué tipo de profesional de la salud eres. Esto ayuda a los pacientes a encontrarte.
+      </p>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+            Tipo de profesional
+          </label>
+          <select [(ngModel)]="tipoProfesionalForm"
+            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Selecciona tu tipo</option>
+            @for (tipo of tiposProfesional; track tipo) {
+              <option [value]="tipo">{{ tipo }}</option>
+            }
+          </select>
+        </div>
+        <button (click)="guardarTipoProfesional()" [disabled]="!tipoProfesionalForm || guardandoPerfil"
+          class="w-full py-2.5 bg-blue-700 hover:bg-blue-800 disabled:opacity-50 text-white font-semibold text-sm rounded-xl transition-colors duration-200">
+          Guardar
+        </button>
+      </div>
     </div>
   }
 
