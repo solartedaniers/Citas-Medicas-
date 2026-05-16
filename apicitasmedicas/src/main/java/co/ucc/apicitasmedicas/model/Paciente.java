@@ -18,9 +18,6 @@ public class Paciente extends Usuario {
     @Column(name = "numero_documento", length = 30)
     private String numeroDocumento;
 
-    @Column(name = "genero", length = 10)
-    private String genero;
-
     @Column(name = "edad")
     private Integer edad;
 
@@ -42,8 +39,7 @@ public class Paciente extends Usuario {
     public String getNumeroDocumento()         { return numeroDocumento; }
     public void   setNumeroDocumento(String n) { this.numeroDocumento = n; }
 
-    public String getGenero()                  { return genero; }
-    public void   setGenero(String g)          { this.genero = g; }
+    // getGenero/setGenero heredados de Usuario
 
     public Integer getEdad()                   { return edad; }
     public void    setEdad(Integer e)          { this.edad = e; }

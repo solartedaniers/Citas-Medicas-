@@ -85,6 +85,18 @@
             @if (cita.motivo) {
               <p class="text-xs text-slate-500 mt-1">Motivo: {{ cita.motivo }}</p>
             }
+            @if (cita.estado === 'REPROGRAMADA' && cita.justificacionReprogramacion) {
+              <div class="mt-2 ml-0 p-2.5 bg-blue-50 border border-blue-100 rounded-xl">
+                <p class="text-xs font-semibold text-blue-600 mb-0.5">Reprogramada por el profesional</p>
+                <p class="text-xs text-slate-600">{{ cita.justificacionReprogramacion }}</p>
+              </div>
+            }
+            @if (cita.estado === 'COMPLETADA' && cita.diagnostico) {
+              <div class="mt-2 ml-0 p-2.5 bg-emerald-50 border border-emerald-100 rounded-xl">
+                <p class="text-xs font-semibold text-emerald-600 mb-0.5">Diagnóstico médico</p>
+                <p class="text-xs text-slate-700 whitespace-pre-line">{{ cita.diagnostico }}</p>
+              </div>
+            }
           </div>
           <!-- Estado y acciones con bordes redondeados y colores -->
           <div class="flex items-center gap-2 flex-wrap">
@@ -113,8 +125,8 @@
 
 <!-- Modal: Agendar cita -->
 @if (modalAgendar) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+  <div class="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 my-auto">
       <h3 class="text-lg font-bold text-slate-900 mb-1">Nueva cita médica</h3>
 
       <!-- Error dentro del modal -->
@@ -185,14 +197,47 @@
           </div>
         }
 
-        <!-- Fecha y hora - con min para no permitir pasado -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Fecha y hora</label>
-          <input type="datetime-local" [(ngModel)]="nuevaCita.fechaHora"
-            [min]="fechaMinima"
-            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-          <p class="text-xs text-slate-400 mt-1">Solo se permiten fechas a partir de hoy</p>
-        </div>
+        <!-- Fecha -->
+        @if (nuevaCita.profesionalId) {
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Fecha</label>
+            <input type="date" [(ngModel)]="fechaSeleccionada" (ngModelChange)="onFechaChange()"
+              [min]="fechaMinimaDate"
+              class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+          </div>
+
+          <!-- Slots disponibles -->
+          @if (fechaSeleccionada) {
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Hora disponible</label>
+              @if (cargandoSlots) {
+                <div class="flex items-center gap-2 text-sm text-slate-500 py-2">
+                  <svg class="animate-spin h-4 w-4 text-blue-600" viewBox="0 0 24 24" fill="none">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  Cargando disponibilidad...
+                </div>
+              } @else if (slotsDisponibles.length === 0) {
+                <p class="text-sm text-amber-600 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
+                  No hay horarios disponibles para esta fecha.
+                </p>
+              } @else {
+                <div class="flex flex-wrap gap-2">
+                  @for (slot of slotsDisponibles; track slot) {
+                    <button type="button" (click)="seleccionarSlot(slot)"
+                      class="px-3 py-1.5 rounded-xl text-sm font-semibold border transition-all duration-200"
+                      [class]="slotSeleccionado === slot
+                        ? 'bg-blue-700 text-white border-blue-700 shadow-sm'
+                        : 'bg-white text-slate-700 border-slate-200 hover:border-blue-400 hover:text-blue-700'">
+                      {{ slot }}
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        }
 
         <!-- Motivo -->
         <div>
@@ -210,8 +255,8 @@
           Cancelar
         </button>
         <button (click)="agendarCita()"
-          class="flex-1 px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-semibold text-sm rounded-xl transition-colors"
-          [disabled]="!nuevaCita.profesionalId || !nuevaCita.fechaHora">
+          class="flex-1 px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-semibold text-sm rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          [disabled]="!nuevaCita.profesionalId || !slotSeleccionado">
           Agendar cita
         </button>
       </div>

@@ -38,6 +38,14 @@ public class Cita {
     @Column(length = 300)
     private String motivo;
 
+    /** Diagnóstico del profesional al completar la cita. */
+    @Column(name = "diagnostico", columnDefinition = "TEXT")
+    private String diagnostico;
+
+    /** Justificación del profesional cuando reprograma la cita. */
+    @Column(name = "justificacion_reprogramacion", columnDefinition = "TEXT")
+    private String justificacionReprogramacion;
+
     /** Se asigna al crear la cita y nunca cambia. */
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion = LocalDateTime.now();
@@ -56,18 +64,21 @@ public class Cita {
 
     // ── Getters ───────────────────────────────────────────────
 
-    public Long           getId()            { return id; }
-    public Paciente       getPaciente()      { return paciente; }
-    public Profesional    getProfesional()   { return profesional; }
-    public LocalDateTime  getFechaHora()     { return fechaHora; }
-    public EstadoCita     getEstado()        { return estado; }
-    public String         getMotivo()        { return motivo; }
-    public LocalDateTime  getFechaCreacion() { return fechaCreacion; }
+    public Long           getId()                          { return id; }
+    public Paciente       getPaciente()                    { return paciente; }
+    public Profesional    getProfesional()                 { return profesional; }
+    public LocalDateTime  getFechaHora()                   { return fechaHora; }
+    public EstadoCita     getEstado()                      { return estado; }
+    public String         getMotivo()                      { return motivo; }
+    public String         getDiagnostico()                 { return diagnostico; }
+    public String         getJustificacionReprogramacion() { return justificacionReprogramacion; }
+    public LocalDateTime  getFechaCreacion()               { return fechaCreacion; }
 
     // ── Setters controlados ───────────────────────────────────
-    // paciente, profesional, id y fechaCreacion son inmutables.
 
-    public void setFechaHora(LocalDateTime fechaHora) { this.fechaHora = fechaHora; }
-    public void setEstado(EstadoCita estado)           { this.estado    = estado; }
-    public void setMotivo(String motivo)               { this.motivo    = motivo; }
+    public void setFechaHora(LocalDateTime v)               { this.fechaHora = v; }
+    public void setEstado(EstadoCita v)                     { this.estado    = v; }
+    public void setMotivo(String v)                         { this.motivo    = v; }
+    public void setDiagnostico(String v)                    { this.diagnostico = v; }
+    public void setJustificacionReprogramacion(String v)    { this.justificacionReprogramacion = v; }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.DayOfWeek;
 import java.util.List;
 
 @Repository
@@ -14,7 +15,9 @@ public interface HorarioRepository extends JpaRepository<HorarioDisponible, Long
 
     List<HorarioDisponible> findByProfesionalId(Long profesionalId);
 
-    @Modifying
+    List<HorarioDisponible> findByProfesionalIdAndDiaSemana(Long profesionalId, DayOfWeek diaSemana);
+
+    @Modifying(clearAutomatically = true)
     @Query(value = "DELETE FROM horarios_disponibles WHERE profesional_id = :profesionalId",
            nativeQuery = true)
     void deleteByProfesionalId(@Param("profesionalId") Long profesionalId);

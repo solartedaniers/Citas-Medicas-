@@ -50,7 +50,16 @@ export class DashboardPacienteComponent implements OnInit {
   filtroEstado = 'TODAS';
   errorModalMsg = '';
 
-  // Fecha mínima para el datepicker (hoy)
+  // Slots disponibles
+  fechaSeleccionada = '';
+  slotsDisponibles: string[] = [];
+  slotSeleccionado = '';
+  cargandoSlots = false;
+
+  get fechaMinimaDate(): string {
+    return new Date().toISOString().slice(0, 10);
+  }
+
   get fechaMinima(): string {
     const ahora = new Date();
     ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
@@ -134,6 +143,9 @@ export class DashboardPacienteComponent implements OnInit {
     this.profesionalesFiltrados = [];
     this.horariosDisponibles = [];
     this.nuevaCita = { profesionalId: 0, fechaHora: '', motivo: '' };
+    this.fechaSeleccionada = '';
+    this.slotsDisponibles = [];
+    this.slotSeleccionado = '';
     this.modalAgendar = true;
   }
 
@@ -173,9 +185,37 @@ export class DashboardPacienteComponent implements OnInit {
 
   cargarHorariosProfesional(): void {
     if (!this.nuevaCita.profesionalId) return;
+    this.slotsDisponibles = [];
+    this.slotSeleccionado = '';
+    this.nuevaCita.fechaHora = '';
     this.especialidadesService.obtenerHorarios(this.nuevaCita.profesionalId).subscribe({
-      next: data => this.horariosDisponibles = data
+      next: data => {
+        this.horariosDisponibles = data;
+        if (this.fechaSeleccionada) this.cargarSlots();
+      }
     });
+  }
+
+  onFechaChange(): void {
+    this.slotsDisponibles = [];
+    this.slotSeleccionado = '';
+    this.nuevaCita.fechaHora = '';
+    if (this.fechaSeleccionada && this.nuevaCita.profesionalId) {
+      this.cargarSlots();
+    }
+  }
+
+  cargarSlots(): void {
+    this.cargandoSlots = true;
+    this.citasService.obtenerSlotsDisponibles(this.nuevaCita.profesionalId, this.fechaSeleccionada).subscribe({
+      next: slots => { this.slotsDisponibles = slots; this.cargandoSlots = false; },
+      error: ()    => { this.cargandoSlots = false; }
+    });
+  }
+
+  seleccionarSlot(slot: string): void {
+    this.slotSeleccionado = slot;
+    this.nuevaCita.fechaHora = `${this.fechaSeleccionada}T${slot}:00`;
   }
 
   agendarCita(): void {

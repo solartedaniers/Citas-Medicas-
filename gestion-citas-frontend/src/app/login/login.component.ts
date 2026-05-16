@@ -42,9 +42,11 @@ export class LoginComponent {
           default:              this.router.navigate(['/login']);
         }
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
-        this.errorMessage = 'Correo o contraseña incorrectos.';
+        this.errorMessage = typeof err.error === 'string'
+          ? err.error
+          : 'Correo o contraseña incorrectos.';
       }
     });
   }

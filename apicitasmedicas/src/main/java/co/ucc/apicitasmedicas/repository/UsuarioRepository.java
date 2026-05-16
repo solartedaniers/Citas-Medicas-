@@ -19,7 +19,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     Optional<Usuario> findByRefreshToken(String refreshToken);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query(value = "UPDATE usuarios SET tipo_usuario = :tipo, rol = :rol WHERE id = :id",
            nativeQuery = true)

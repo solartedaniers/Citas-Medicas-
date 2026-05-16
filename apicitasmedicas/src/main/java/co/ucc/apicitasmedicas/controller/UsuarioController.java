@@ -1,5 +1,6 @@
 package co.ucc.apicitasmedicas.controller;
 
+import co.ucc.apicitasmedicas.dto.ActualizarPerfilGeneralRequestDTO;
 import co.ucc.apicitasmedicas.dto.ActualizarPerfilPacienteRequestDTO;
 import co.ucc.apicitasmedicas.dto.ActualizarProfesionalRequestDTO;
 import co.ucc.apicitasmedicas.dto.AsignarRolRequestDTO;
@@ -92,6 +93,17 @@ public class UsuarioController {
                                                        @RequestBody ActualizarPerfilPacienteRequestDTO request) {
         try {
             return ResponseEntity.ok(usuarioService.actualizarPerfilPaciente(id, request));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    /** Cualquier usuario actualiza nombre, género, foto y (si es paciente) teléfono */
+    @PutMapping("/{id}/perfil-general")
+    public ResponseEntity<?> actualizarPerfilGeneral(@PathVariable Long id,
+                                                      @RequestBody ActualizarPerfilGeneralRequestDTO request) {
+        try {
+            return ResponseEntity.ok(usuarioService.actualizarPerfilGeneral(id, request));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

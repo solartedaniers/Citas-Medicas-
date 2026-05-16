@@ -1,5 +1,6 @@
 package co.ucc.apicitasmedicas.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -20,6 +21,7 @@ public class HorarioDisponible {
      * Relación ManyToOne: un profesional puede tener muchos horarios.
      * FetchType.LAZY para no cargar el profesional completo innecesariamente.
      */
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profesional_id", nullable = false)
     private Profesional profesional;

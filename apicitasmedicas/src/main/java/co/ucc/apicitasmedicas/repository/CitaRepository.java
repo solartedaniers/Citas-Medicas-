@@ -17,10 +17,16 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
 
     List<Cita> findByPacienteIdAndEstado(Long pacienteId, EstadoCita estado);
 
-    /** Verifica si el profesional ya tiene una cita en esa fecha/hora (excluyendo canceladas). */
     boolean existsByProfesionalIdAndFechaHoraAndEstadoNot(
             Long profesionalId,
             LocalDateTime fechaHora,
+            EstadoCita estado
+    );
+
+    List<Cita> findByProfesionalIdAndFechaHoraBetweenAndEstadoNot(
+            Long profesionalId,
+            LocalDateTime inicio,
+            LocalDateTime fin,
             EstadoCita estado
     );
 }

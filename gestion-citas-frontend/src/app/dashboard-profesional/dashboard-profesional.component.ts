@@ -24,7 +24,8 @@ export class DashboardProfesionalComponent implements OnInit {
   successMsg = '';
   errorMsg = '';
 
-  vistaActiva: 'agenda' | 'horarios' | 'perfil' = 'agenda';
+  vistaActiva: 'agenda' | 'horarios' = 'agenda';
+  modoEdicionHorarios = false;
 
   diasSemana = [
     { valor: 'MONDAY',    etiqueta: 'Lunes' },
@@ -52,6 +53,23 @@ export class DashboardProfesionalComponent implements OnInit {
   tipoProfesionalForm = '';
   guardandoPerfil = false;
 
+  // Modal completar cita
+  modalCompletar = false;
+  citaACompletar: CitaResponse | null = null;
+  diagnosticoForm = '';
+  guardandoCompletar = false;
+  errorModalMsg = '';
+
+  // Modal reprogramar (por profesional)
+  modalReprogramarProf = false;
+  citaAReprogramarProf: CitaResponse | null = null;
+  fechaReprogProf = '';
+  slotsReprogProf: string[] = [];
+  slotReprogProf = '';
+  justificacionForm = '';
+  cargandoSlotsProf = false;
+  guardandoReprogProf = false;
+
   constructor(
     private readonly citasService: CitasService,
     private readonly especialidadesService: EspecialidadesService,
@@ -68,7 +86,84 @@ export class DashboardProfesionalComponent implements OnInit {
 
   get profesionalId(): number { return this.authService.getId(); }
 
-  setVista(v: 'agenda' | 'horarios' | 'perfil'): void { this.vistaActiva = v; }
+  get fechaMinimaDate(): string { return new Date().toISOString().slice(0, 10); }
+
+  // ── Completar cita ────────────────────────────────────────
+
+  abrirCompletar(cita: CitaResponse): void {
+    this.citaACompletar  = cita;
+    this.diagnosticoForm = '';
+    this.errorModalMsg   = '';
+    this.modalCompletar  = true;
+  }
+
+  confirmarCompletar(): void {
+    if (!this.citaACompletar || !this.diagnosticoForm.trim()) return;
+    this.guardandoCompletar = true;
+    this.citasService.completar(this.citaACompletar.id, this.profesionalId, this.diagnosticoForm).subscribe({
+      next: () => {
+        this.guardandoCompletar = false;
+        this.modalCompletar = false;
+        this.mostrarExito('Cita completada con diagnóstico registrado');
+        this.cargarCitas();
+      },
+      error: (err) => {
+        this.guardandoCompletar = false;
+        this.errorModalMsg = typeof err.error === 'string' ? err.error : 'Error al completar la cita';
+      }
+    });
+  }
+
+  // ── Reprogramar cita (por profesional) ────────────────────
+
+  abrirReprogramarProf(cita: CitaResponse): void {
+    this.citaAReprogramarProf = cita;
+    this.fechaReprogProf  = '';
+    this.slotsReprogProf  = [];
+    this.slotReprogProf   = '';
+    this.justificacionForm = '';
+    this.errorModalMsg    = '';
+    this.modalReprogramarProf = true;
+  }
+
+  onFechaReprogProfChange(): void {
+    this.slotsReprogProf = [];
+    this.slotReprogProf  = '';
+    if (this.fechaReprogProf) {
+      this.cargandoSlotsProf = true;
+      this.citasService.obtenerSlotsDisponibles(this.profesionalId, this.fechaReprogProf).subscribe({
+        next: slots => { this.slotsReprogProf = slots; this.cargandoSlotsProf = false; },
+        error: ()    => { this.cargandoSlotsProf = false; }
+      });
+    }
+  }
+
+  confirmarReprogramarProf(): void {
+    if (!this.citaAReprogramarProf || !this.slotReprogProf || !this.justificacionForm.trim()) return;
+    this.guardandoReprogProf = true;
+    const nuevaFechaHora = `${this.fechaReprogProf}T${this.slotReprogProf}:00`;
+    this.citasService.reprogramarPorProfesional(
+      this.citaAReprogramarProf.id, this.profesionalId, nuevaFechaHora, this.justificacionForm
+    ).subscribe({
+      next: () => {
+        this.guardandoReprogProf  = false;
+        this.modalReprogramarProf = false;
+        this.mostrarExito('Cita reprogramada. El paciente verá la nueva fecha y justificación.');
+        this.cargarCitas();
+      },
+      error: (err) => {
+        this.guardandoReprogProf = false;
+        this.errorModalMsg = typeof err.error === 'string' ? err.error : 'Error al reprogramar';
+      }
+    });
+  }
+
+  get especialidad(): string {
+    const u = this.authService.getUsuario() as any;
+    return u?.especialidad ?? 'Medicina General';
+  }
+
+  setVista(v: 'agenda' | 'horarios'): void { this.vistaActiva = v; }
 
   cargarCitas(): void {
     this.loading = true;
@@ -92,6 +187,7 @@ export class DashboardProfesionalComponent implements OnInit {
   }
 
   agregarHorario(): void {
+    this.modoEdicionHorarios = true;
     this.horariosForm.push({ diaSemana: 'MONDAY', horaInicio: '08:00', horaFin: '12:00' });
   }
 
@@ -99,7 +195,11 @@ export class DashboardProfesionalComponent implements OnInit {
 
   guardarHorarios(): void {
     this.especialidadesService.definirHorarios(this.profesionalId, this.horariosForm).subscribe({
-      next: () => this.mostrarExito('Horarios guardados correctamente'),
+      next: () => {
+        this.modoEdicionHorarios = false;
+        this.mostrarExito('Horarios guardados correctamente');
+        this.cargarHorarios();
+      },
       error: (err) => {
         const msg = typeof err.error === 'string' ? err.error : 'Error al guardar los horarios';
         this.mostrarError(msg);

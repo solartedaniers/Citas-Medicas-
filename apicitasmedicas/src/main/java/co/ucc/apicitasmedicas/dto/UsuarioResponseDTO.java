@@ -11,7 +11,9 @@ public class UsuarioResponseDTO {
     private String  tipoProfesional;
     // Datos de paciente para el perfil
     private String  telefono;
+    // Campos comunes de perfil
     private String  genero;
+    private String  fotoPerfil;
 
     public UsuarioResponseDTO() {}
 
@@ -37,6 +39,8 @@ public class UsuarioResponseDTO {
     public String  getTelefono()        { return telefono; }
     public String  getGenero()          { return genero; }
 
-    public void setTelefono(String t)   { this.telefono = t; }
-    public void setGenero(String g)     { this.genero = g; }
+    public void setTelefono(String t)    { this.telefono = t; }
+    public void setGenero(String g)      { this.genero = g; }
+    public String getFotoPerfil()        { return fotoPerfil; }
+    public void setFotoPerfil(String f)  { this.fotoPerfil = f; }
 }

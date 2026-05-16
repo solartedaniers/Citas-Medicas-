@@ -5,13 +5,15 @@ export interface CitaRequest {
 }
 
 export interface CitaResponse {
-  id:                number;
-  pacienteNombre:    string;
-  pacienteCorreo:    string;
-  profesionalNombre: string;
-  especialidad:      string;
-  fechaHora:         string;
-  estado:            'PENDIENTE' | 'CONFIRMADA' | 'CANCELADA' | 'REPROGRAMADA' | 'COMPLETADA';
-  motivo:            string;
-  fechaCreacion:     string;
+  id:                          number;
+  pacienteNombre:              string;
+  pacienteCorreo:              string;
+  profesionalNombre:           string;
+  especialidad:                string;
+  fechaHora:                   string;
+  estado:                      'PENDIENTE' | 'CONFIRMADA' | 'CANCELADA' | 'REPROGRAMADA' | 'COMPLETADA';
+  motivo:                      string;
+  fechaCreacion:               string;
+  diagnostico?:                string;
+  justificacionReprogramacion?: string;
 }

@@ -23,12 +23,21 @@ public class AuthController {
     /** Login → devuelve token + refreshToken + datos básicos del usuario. */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequestDTO request) {
-        AuthResponseDTO response = usuarioService.login(request.getCorreo(), request.getContrasena());
-        if (response == null) {
+        try {
+            AuthResponseDTO response = usuarioService.login(request.getCorreo(), request.getContrasena());
+            if (response == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Correo o contraseña incorrectos.");
+            }
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            if ("CUENTA_INACTIVA".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Tu cuenta ha sido desactivada. Contacta al administrador.");
+            }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Credenciales incorrectas o cuenta inactiva");
+                    .body("Correo o contraseña incorrectos.");
         }
-        return ResponseEntity.ok(response);
     }
 
     /** Registro de nuevo paciente → devuelve token + refreshToken inmediatamente. */

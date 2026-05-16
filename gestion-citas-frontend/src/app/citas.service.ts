@@ -41,4 +41,25 @@ export class CitasService {
       request
     );
   }
+
+  completar(citaId: number, profesionalId: number, diagnostico: string): Observable<CitaResponse> {
+    return this.http.put<CitaResponse>(
+      `${this.apiUrl}/${citaId}/completar/profesional/${profesionalId}`,
+      { diagnostico }
+    );
+  }
+
+  reprogramarPorProfesional(citaId: number, profesionalId: number,
+                             nuevaFechaHora: string, justificacion: string): Observable<CitaResponse> {
+    return this.http.put<CitaResponse>(
+      `${this.apiUrl}/${citaId}/reprogramar/profesional/${profesionalId}`,
+      { nuevaFechaHora, justificacion }
+    );
+  }
+
+  obtenerSlotsDisponibles(profesionalId: number, fecha: string): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/profesional/${profesionalId}/slots`, {
+      params: { fecha }
+    });
+  }
 }

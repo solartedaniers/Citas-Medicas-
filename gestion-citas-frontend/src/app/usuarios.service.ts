@@ -46,4 +46,13 @@ export class UsuariosService {
   actualizarPerfilPaciente(id: number, data: { telefono?: string; genero?: string }): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}/perfil-paciente`, data);
   }
+
+  actualizarPerfilGeneral(id: number, data: {
+    nombre?: string;
+    genero?: string;
+    fotoPerfil?: string;
+    telefono?: string;
+  }): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}/perfil-general`, data);
+  }
 }

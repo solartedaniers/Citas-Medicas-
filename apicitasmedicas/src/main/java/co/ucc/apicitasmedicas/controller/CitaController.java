@@ -2,6 +2,8 @@ package co.ucc.apicitasmedicas.controller;
 
 import co.ucc.apicitasmedicas.dto.CitaRequestDTO;
 import co.ucc.apicitasmedicas.dto.CitaResponseDTO;
+import co.ucc.apicitasmedicas.dto.CompletarCitaRequestDTO;
+import co.ucc.apicitasmedicas.dto.ReprogramarPorProfesionalRequestDTO;
 import co.ucc.apicitasmedicas.services.ICitaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -71,6 +73,46 @@ public class CitaController {
             return ResponseEntity.ok(citaService.reprogramarCita(citaId, pacienteId, request));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    /** Profesional: marcar cita como completada con diagnóstico. */
+    @PutMapping("/{citaId}/completar/profesional/{profesionalId}")
+    public ResponseEntity<?> completar(@PathVariable Long citaId,
+                                        @PathVariable Long profesionalId,
+                                        @RequestBody CompletarCitaRequestDTO request) {
+        try {
+            return ResponseEntity.ok(
+                citaService.completarCita(citaId, profesionalId, request.getDiagnostico()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    /** Profesional: reprogramar una cita con justificación. */
+    @PutMapping("/{citaId}/reprogramar/profesional/{profesionalId}")
+    public ResponseEntity<?> reprogramarPorProfesional(@PathVariable Long citaId,
+                                                        @PathVariable Long profesionalId,
+                                                        @RequestBody ReprogramarPorProfesionalRequestDTO request) {
+        try {
+            return ResponseEntity.ok(
+                citaService.reprogramarCitaPorProfesional(
+                    citaId, profesionalId,
+                    request.getNuevaFechaHora(), request.getJustificacion()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    /** Obtiene los slots de 15 min disponibles para un profesional en una fecha (YYYY-MM-DD). */
+    @GetMapping("/profesional/{profesionalId}/slots")
+    public ResponseEntity<List<String>> slotsDisponibles(
+            @PathVariable Long profesionalId,
+            @RequestParam String fecha) {
+        try {
+            return ResponseEntity.ok(citaService.obtenerSlotsDisponibles(profesionalId, fecha));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(List.of());
         }
     }
 }

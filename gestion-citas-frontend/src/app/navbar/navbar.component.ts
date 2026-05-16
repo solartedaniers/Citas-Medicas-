@@ -13,12 +13,11 @@ import { UsuariosService } from '../usuarios.service';
 })
 export class NavbarComponent {
 
-  // ── Estado del dropdown ───────────────────────────────────
   dropdownAbierto = false;
   mostrarPerfil   = false;
 
-  // ── Formulario perfil paciente ────────────────────────────
-  perfilForm       = { telefono: '', genero: '' };
+  perfilForm = { nombre: '', genero: '', telefono: '', fotoPerfil: '' };
+  editandoNombre   = false;
   editandoTelefono = false;
   editandoGenero   = false;
   guardandoPerfil  = false;
@@ -29,8 +28,6 @@ export class NavbarComponent {
     public readonly authService: AuthService,
     private readonly usuariosService: UsuariosService
   ) {}
-
-  // ── Getters ───────────────────────────────────────────────
 
   get usuario() { return this.authService.getUsuario(); }
 
@@ -45,62 +42,71 @@ export class NavbarComponent {
     return labels[this.rol] ?? '';
   }
 
-  // ── Acciones navbar ───────────────────────────────────────
+  logout(): void { this.authService.logout(); }
 
-  logout(): void {
-    this.authService.logout();
-  }
-
-  toggleDropdown(): void {
-    this.dropdownAbierto = !this.dropdownAbierto;
-  }
-
-  // ── Perfil paciente ───────────────────────────────────────
+  toggleDropdown(): void { this.dropdownAbierto = !this.dropdownAbierto; }
 
   abrirPerfil(): void {
     this.dropdownAbierto = false;
     this.successPerfilMsg = '';
     this.errorPerfilMsg   = '';
+    this.editandoNombre   = false;
     this.editandoTelefono = false;
     this.editandoGenero   = false;
 
-    // Cargar datos actuales desde localStorage
     const u = this.authService.getUsuario() as any;
-    this.perfilForm.telefono = u?.telefono ?? '';
-    this.perfilForm.genero   = u?.genero   ?? '';
+    this.perfilForm.nombre     = u?.nombre     ?? '';
+    this.perfilForm.genero     = u?.genero     ?? '';
+    this.perfilForm.telefono   = u?.telefono   ?? '';
+    this.perfilForm.fotoPerfil = u?.fotoPerfil ?? '';
     this.mostrarPerfil = true;
   }
 
   cerrarPerfil(): void {
     this.mostrarPerfil    = false;
+    this.editandoNombre   = false;
     this.editandoTelefono = false;
     this.editandoGenero   = false;
     this.successPerfilMsg = '';
     this.errorPerfilMsg   = '';
   }
 
-  guardarPerfil(): void {
-    if (!this.editandoTelefono && !this.editandoGenero) {
-      this.cerrarPerfil();
-      return;
-    }
+  onFotoSeleccionada(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const reader = new FileReader();
+    reader.onload = () => { this.perfilForm.fotoPerfil = reader.result as string; };
+    reader.readAsDataURL(input.files[0]);
+  }
 
+  guardarPerfil(): void {
     this.guardandoPerfil = true;
     const id = this.authService.getId();
 
-    this.usuariosService.actualizarPerfilPaciente(id, this.perfilForm).subscribe({
-      next: (res: any) => {
+    const data: Record<string, string | undefined> = {
+      nombre:     this.perfilForm.nombre     || undefined,
+      genero:     this.perfilForm.genero     || undefined,
+      fotoPerfil: this.perfilForm.fotoPerfil || undefined
+    };
+    if (this.rol === 'PACIENTE') {
+      data['telefono'] = this.perfilForm.telefono || undefined;
+    }
+
+    this.usuariosService.actualizarPerfilGeneral(id, data as any).subscribe({
+      next: () => {
         this.guardandoPerfil  = false;
+        this.editandoNombre   = false;
         this.editandoTelefono = false;
         this.editandoGenero   = false;
         this.successPerfilMsg = 'Perfil actualizado correctamente';
 
-        // Actualizar los datos en localStorage para que persistan
-        const usuarioActual = this.authService.getUsuario() as any;
-        if (usuarioActual) {
-          usuarioActual.telefono = this.perfilForm.telefono;
-          usuarioActual.genero   = this.perfilForm.genero;
-          localStorage.setItem('usuario', JSON.stringify(usuarioActual));
+        const u = this.authService.getUsuario() as any;
+        if (u) {
+          u.nombre     = this.perfilForm.nombre;
+          u.genero     = this.perfilForm.genero;
+          u.fotoPerfil = this.perfilForm.fotoPerfil;
+          if (this.rol === 'PACIENTE') u.telefono = this.perfilForm.telefono;
+          localStorage.setItem('usuario', JSON.stringify(u));
         }
 
         setTimeout(() => this.successPerfilMsg = '', 3000);

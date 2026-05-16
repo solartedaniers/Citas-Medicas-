@@ -1,5 +1,6 @@
 package co.ucc.apicitasmedicas.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,6 +24,7 @@ public class Especialidad {
     @Column(length = 300)
     private String descripcion;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "especialidad", fetch = FetchType.LAZY)
     private List<Profesional> profesionales = new ArrayList<>();
 

@@ -48,6 +48,14 @@ export class RegistroComponent {
       this.errorMessage = 'La contraseña debe tener mínimo 6 caracteres.';
       return;
     }
+    if (!/^\d{10}$/.test(this.form.numeroDocumento)) {
+      this.errorMessage = 'El número de documento debe tener exactamente 10 dígitos numéricos.';
+      return;
+    }
+    if (this.form.telefono && !/^\d{10}$/.test(this.form.telefono)) {
+      this.errorMessage = 'El teléfono debe tener exactamente 10 dígitos numéricos.';
+      return;
+    }
 
     this.loading = true;
 

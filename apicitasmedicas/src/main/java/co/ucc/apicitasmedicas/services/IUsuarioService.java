@@ -3,6 +3,7 @@ package co.ucc.apicitasmedicas.services;
 import java.util.List;
 import java.util.Optional;
 
+import co.ucc.apicitasmedicas.dto.ActualizarPerfilGeneralRequestDTO;
 import co.ucc.apicitasmedicas.dto.ActualizarPerfilPacienteRequestDTO;
 import co.ucc.apicitasmedicas.dto.AuthResponseDTO;
 import co.ucc.apicitasmedicas.dto.RegistroPacienteRequestDTO;
@@ -26,6 +27,9 @@ public interface IUsuarioService {
     // Profesional
     UsuarioResponseDTO actualizarTipoProfesional(Long profesionalId, String tipoProfesional);
 
-    // Paciente
+    // Perfil paciente (teléfono + género)
     UsuarioResponseDTO actualizarPerfilPaciente(Long pacienteId, ActualizarPerfilPacienteRequestDTO request);
+
+    // Perfil general (nombre + género + foto + teléfono) – aplica a todos los roles
+    UsuarioResponseDTO actualizarPerfilGeneral(Long usuarioId, ActualizarPerfilGeneralRequestDTO request);
 }

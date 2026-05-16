@@ -48,6 +48,13 @@ public abstract class Usuario {
     @Column(nullable = false)
     private boolean activo = true;
 
+    // ── Campos comunes de perfil ──────────────────────────────
+    @Column(name = "genero", length = 10)
+    private String genero;
+
+    @Column(name = "foto_perfil", columnDefinition = "TEXT")
+    private String fotoPerfil;
+
     // ── Constructores ─────────────────────────────────────────
     protected Usuario() {}
 
@@ -61,24 +68,28 @@ public abstract class Usuario {
     // ── Getters (todos) ───────────────────────────────────────
     // Lectura siempre permitida; la contrasena se expone solo para validación interna
 
-    public Long getId()           { return id; }
-    public String getNombre()     { return nombre; }
-    public String getCorreo()     { return correo; }
-    public String getContrasena() { return contrasena; }
-    public Rol getRol()           { return rol; }
+    public Long getId()             { return id; }
+    public String getNombre()       { return nombre; }
+    public String getCorreo()       { return correo; }
+    public String getContrasena()   { return contrasena; }
+    public Rol getRol()             { return rol; }
     public String getRefreshToken() { return refreshToken; }
-    public boolean isActivo()     { return activo; }
+    public boolean isActivo()       { return activo; }
+    public String getGenero()       { return genero; }
+    public String getFotoPerfil()   { return fotoPerfil; }
 
     // ── Setters controlados ───────────────────────────────────
     // Solo se expone setter donde el cambio es válido en el negocio.
     // NO se expone setter de "id" (lo asigna JPA) ni de "correo"
     // (inmutable tras el registro para evitar inconsistencias).
 
-    public void setNombre(String nombre)           { this.nombre = nombre; }
-    public void setContrasena(String contrasena)   { this.contrasena = contrasena; }
-    public void setRol(Rol rol)                    { this.rol = rol; }
+    public void setNombre(String nombre)             { this.nombre = nombre; }
+    public void setContrasena(String contrasena)     { this.contrasena = contrasena; }
+    public void setRol(Rol rol)                      { this.rol = rol; }
     public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
-    public void setActivo(boolean activo)          { this.activo = activo; }
+    public void setActivo(boolean activo)            { this.activo = activo; }
+    public void setGenero(String genero)             { this.genero = genero; }
+    public void setFotoPerfil(String fotoPerfil)     { this.fotoPerfil = fotoPerfil; }
 
     // Setter de correo protegido: solo lo usan las subclases en su constructor
     protected void setCorreo(String correo)        { this.correo = correo; }
